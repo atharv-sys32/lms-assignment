@@ -18,7 +18,7 @@ export default function Login() {
       const res = await api.post('/auth/login', { email, password });
       setAuth({ email: res.data.email, role: res.data.role, fullName: res.data.fullName }, res.data.token);
       toast.success('Logged in successfully');
-      if (res.data.role === 'Borrower') router.push('/apply');
+      if (res.data.role === 'Borrower') router.push('/status');
       else router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Login failed');

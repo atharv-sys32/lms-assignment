@@ -41,10 +41,20 @@ export default function BorrowerStatus() {
           <div className="space-y-4">
             {loans.map(loan => (
               <div key={loan._id} className="bg-white p-6 shadow rounded">
-                <p><strong>Amount:</strong> ₹{loan.amount}</p>
-                <p><strong>Status:</strong> <span className="font-bold text-blue-600">{loan.status}</span></p>
+                <p><strong>Amount:</strong> ₹{loan.amount.toLocaleString()}</p>
+                <p className="flex items-center gap-2"><strong>Status:</strong> 
+                  <span className={`px-2 py-1 rounded text-xs font-bold text-white ${
+                    loan.status === 'Approved' ? 'bg-green-500' :
+                    loan.status === 'Rejected' ? 'bg-red-500' :
+                    loan.status === 'Pending' ? 'bg-yellow-500' :
+                    loan.status === 'Disbursed' ? 'bg-blue-500' :
+                    'bg-gray-500'
+                  }`}>
+                    {loan.status}
+                  </span>
+                </p>
                 <p><strong>Tenure:</strong> {loan.tenure} days</p>
-                <p><strong>Total Repayment:</strong> ₹{loan.totalRepayment.toFixed(2)}</p>
+                <p><strong>Total Repayment:</strong> ₹{loan.totalRepayment.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
                 {loan.rejectionReason && <p className="text-red-500"><strong>Reason:</strong> {loan.rejectionReason}</p>}
               </div>
             ))}

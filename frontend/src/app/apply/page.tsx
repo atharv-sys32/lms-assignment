@@ -13,9 +13,19 @@ export default function ApplyLoan() {
   useEffect(() => {
     if (!token) router.push('/login');
     if (user?.role !== 'Borrower') router.push('/dashboard');
+    else {
+      // Fetch user profile to prefill data if they already have it
+      api.get('/auth/me').then(res => {
+        if (res.data.pan) setPan(res.data.pan);
+        if (res.data.dob) setDob(new Date(res.data.dob).toISOString().split('T')[0]);
+        if (res.data.monthlySalary) setMonthlySalary(res.data.monthlySalary.toString());
+        if (res.data.employmentMode) setEmploymentMode(res.data.employmentMode);
+      }).catch(err => console.error(err));
+    }
   }, [token, user, router]);
 
   // Step 2 Form
+  const [loading, setLoading] = useState(false);
   const [pan, setPan] = useState('');
   const [dob, setDob] = useState('');
   const [monthlySalary, setMonthlySalary] = useState('');
@@ -34,6 +44,7 @@ export default function ApplyLoan() {
   const totalRepayment = amount + si;
 
   const submitStep2 = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     try {
       await api.post('/loan/personal-details', { 
@@ -43,10 +54,13 @@ export default function ApplyLoan() {
       setStep(3);
     } catch (error: any) {
       toast.error(error.response?.data?.details?.join(', ') || error.response?.data?.error || 'Failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   const submitStep3 = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     if (!file) return toast.error('Please select a file');
     const formData = new FormData();
@@ -59,16 +73,21 @@ export default function ApplyLoan() {
       setStep(4);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to upload');
+    } finally {
+      setLoading(false);
     }
   };
 
   const submitStep4 = async () => {
+    setLoading(true);
     try {
       await api.post('/loan/apply', { amount, tenure });
       toast.success('Loan Applied Successfully!');
-      router.push('/dashboard'); // or redirect to status page
+      router.push('/status');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to apply');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,7 +119,7 @@ export default function ApplyLoan() {
                 <option value="Unemployed">Unemployed</option>
               </select>
             </div>
-            <button className="w-full bg-blue-600 text-white p-2 rounded">Check Eligibility & Next</button>
+            <button disabled={loading} className="w-full bg-blue-600 text-white p-2 rounded disabled:bg-blue-400">{loading ? "Checking..." : "Check Eligibility & Next"}</button>
           </form>
         )}
 
@@ -108,7 +127,7 @@ export default function ApplyLoan() {
           <form onSubmit={submitStep3}>
             <h2 className="text-2xl font-bold mb-6">Step 3: Upload Salary Slip</h2>
             <input type="file" className="mb-6 w-full" accept=".pdf,.jpg,.jpeg,.png" onChange={e => setFile(e.target.files?.[0] || null)} required />
-            <button className="w-full bg-blue-600 text-white p-2 rounded">Upload & Next</button>
+            <button disabled={loading} className="w-full bg-blue-600 text-white p-2 rounded disabled:bg-blue-400">{loading ? "Uploading..." : "Upload & Next"}</button>
           </form>
         )}
 
@@ -132,7 +151,7 @@ export default function ApplyLoan() {
               <p className="text-xl mt-2">Total Repayment: <strong>₹{totalRepayment.toFixed(2)}</strong></p>
             </div>
 
-            <button onClick={submitStep4} className="w-full bg-green-600 text-white p-3 rounded font-bold">Apply Now</button>
+            <button onClick={submitStep4} disabled={loading} className="w-full bg-green-600 text-white p-3 rounded font-bold disabled:bg-green-400">{loading ? "Applying..." : "Apply Now"}</button>
           </div>
         )}
       </div>

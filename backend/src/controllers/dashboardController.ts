@@ -83,8 +83,20 @@ export const markDisbursed = async (req: Request, res: Response) => {
 // Collection: Disbursed loans
 export const getDisbursedLoans = async (req: Request, res: Response) => {
   try {
-    const loans = await Loan.find({ status: LoanStatus.Disbursed }).populate('borrower', '-password');
-    res.json(loans);
+    const loans = await Loan.find({ status: LoanStatus.Disbursed }).populate('borrower', '-password').lean();
+    
+    // Calculate outstanding balance for each loan
+    const loansWithBalance = await Promise.all(loans.map(async (loan) => {
+      const payments = await Payment.find({ loan: loan._id });
+      const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+      return {
+        ...loan,
+        totalPaid,
+        outstandingBalance: loan.totalRepayment - totalPaid
+      };
+    }));
+    
+    res.json(loansWithBalance);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }

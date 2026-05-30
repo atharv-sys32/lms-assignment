@@ -45,7 +45,7 @@ export default function CollectionModule() {
             <thead>
               <tr className="border-b">
                 <th className="py-2">Borrower</th>
-                <th>Amount Due</th>
+                <th>Remaining Balance</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -53,7 +53,7 @@ export default function CollectionModule() {
               {loans.map(loan => (
                 <tr key={loan._id} className="border-b">
                   <td className="py-2">{loan.borrower?.fullName}</td>
-                  <td>₹{loan.totalRepayment.toFixed(2)}</td>
+                  <td>\n                    <p>Total: ₹{loan.totalRepayment.toFixed(2)}</p>\n                    <p className="font-bold text-red-600">Left: ₹{loan.outstandingBalance?.toFixed(2)}</p>\n                  </td>
                   <td>
                     <button 
                       onClick={() => setPaymentData({ ...paymentData, loanId: loan._id })}

@@ -37,3 +37,12 @@ export const login = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};

@@ -27,33 +27,56 @@ export default function SanctionModule() {
   };
 
   return (
-    <div className="bg-white p-6 shadow rounded">
-      <h2 className="text-xl font-bold mb-4">Sanction - Applied Loans</h2>
+    <div className="bg-white p-6 shadow rounded overflow-x-auto">
+      <h2 className="text-xl font-bold mb-4">Sanction - Pending Applications</h2>
       {loans.length === 0 ? <p>No pending loans.</p> : (
-        <table className="w-full text-left">
+        <table className="w-full text-left min-w-[800px]">
           <thead>
             <tr className="border-b">
               <th className="py-2">Borrower</th>
-              <th>Amount</th>
-              <th>Tenure</th>
+              <th>Profile</th>
+              <th>Loan Details</th>
+              <th>Documents</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loans.map(loan => (
               <tr key={loan._id} className="border-b">
-                <td className="py-2">
-                  {loan.borrower?.fullName}<br/>
-                  <span className="text-sm text-gray-500">PAN: {loan.borrower?.pan}</span>
+                <td className="py-4 align-top">
+                  <strong>{loan.borrower?.fullName}</strong><br/>
+                  <span className="text-sm text-gray-500">{loan.borrower?.email}</span>
                 </td>
-                <td>₹{loan.amount}</td>
-                <td>{loan.tenure} days</td>
-                <td className="flex gap-2 py-2">
-                  <button onClick={() => updateStatus(loan._id, 'Approved')} className="bg-green-500 text-white px-2 py-1 rounded text-sm">Approve</button>
-                  <button onClick={() => {
-                    const reason = prompt('Reason for rejection:');
-                    if (reason) updateStatus(loan._id, 'Rejected', reason);
-                  }} className="bg-red-500 text-white px-2 py-1 rounded text-sm">Reject</button>
+                <td className="py-4 align-top text-sm">
+                  <p><strong>PAN:</strong> {loan.borrower?.pan}</p>
+                  <p><strong>Salary:</strong> ₹{loan.borrower?.monthlySalary}</p>
+                  <p><strong>Type:</strong> {loan.borrower?.employmentMode}</p>
+                </td>
+                <td className="py-4 align-top text-sm">
+                  <p><strong>Amount:</strong> ₹{loan.amount}</p>
+                  <p><strong>Tenure:</strong> {loan.tenure} days</p>
+                  <p><strong>Total Repay:</strong> ₹{loan.totalRepayment.toFixed(2)}</p>
+                </td>
+                <td className="py-4 align-top text-sm">
+                  {loan.borrower?.salarySlipUrl ? (
+                    <a 
+                      href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/${loan.borrower.salarySlipUrl}`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      View Salary Slip
+                    </a>
+                  ) : 'No Document'}
+                </td>
+                <td className="py-4 align-top">
+                  <div className="flex flex-col gap-2">
+                    <button onClick={() => updateStatus(loan._id, 'Approved')} className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">Approve</button>
+                    <button onClick={() => {
+                      const reason = prompt('Reason for rejection:');
+                      if (reason) updateStatus(loan._id, 'Rejected', reason);
+                    }} className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Reject</button>
+                  </div>
                 </td>
               </tr>
             ))}

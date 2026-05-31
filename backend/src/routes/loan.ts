@@ -3,11 +3,17 @@ import multer from 'multer';
 import { savePersonalDetails, uploadSalarySlip, applyLoan, getMyLoans } from '../controllers/loanController';
 import { authenticate, authorize } from '../middlewares/auth';
 import { UserRole } from '../models/User';
+import fs from 'fs';
 
 const router = Router();
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
+  destination: (req, file, cb) => {
+    if (!fs.existsSync('uploads')) {
+      fs.mkdirSync('uploads');
+    }
+    cb(null, 'uploads/');
+  },
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
 });
 const upload = multer({ 
